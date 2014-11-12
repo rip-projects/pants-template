@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Template Example</title>
+
+    <!-- polymer platform dependencies -->
+    <script type="text/javascript" src="../vendor/platform/platform.js"></script>
+
+    <!-- pants-observe inner dependencies -->
+    <script type="text/javascript" src="../vendor/pants-observe/js/weakmap.poly.js"></script>
+    <script type="text/javascript" src="../vendor/pants-observe/js/observe.poly.js"></script>
+    <script type="text/javascript" src="../vendor/pants-observe/js/path.js"></script>
+    <script type="text/javascript" src="../vendor/pants-observe/js/observe.js"></script>
+
+    <!-- pants-node inner dependencies -->
+    <!-- <script type="text/javascript" src="../js/node.js"></script> -->
+
+    <!-- pants-template inner dependencies -->
+    <script type="text/javascript" src="../lib/mustache.js"></script>
+    <script type="text/javascript" src="../js/expression.js"></script>
+    <script type="text/javascript" src="../js/node.js"></script>
+    <script type="text/javascript" src="../js/template.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+    (function(root) {
+        "use strict";
+
+        root.data = {
+            name: 'Ganesha',
+            location: 'Jakarta'
+        };
+    })(this);
+    </script>
+
+    <div>
+        <template is="pants-template" bind="{{ data }}">
+            <div class="container">
+                <template shadow>
+                    Name <input type="text" value="{{ name }}">
+                </template>
+                <template>
+                    Location <input type="text" value="{{ location }}">
+                </template>
+            </div>
+        </template>
+    </div>
+
+    <div>
+        <template is="pants-template" bind="{{ data }}">
+            <div class="container">
+                <template shadow>
+                    Name <input type="text" value="{{ name }}">
+                </template>
+                <template shadow>
+                    Location <input type="text" value="{{ location }}">
+                </template>
+            </div>
+        </template>
+    </div>
+
+</body>
+</html>
