@@ -73,6 +73,7 @@
     Comment.prototype.bind = Comment.prototype.unbind = noop;
 
     Text.prototype.bind = function(context) {
+        // console.log(this.textContent, context);
         this.observe_(context, this.textContent, function(renderedText) {
             this.textContent = renderedText;
         }.bind(this));
@@ -87,7 +88,15 @@
 
         if (this.childNodes.length) {
             for (var child = this.childNodes[0]; child; child = child.nextSibling) {
-                child.bind(context);
+
+                child.parentTemplate_ = this.parentTemplate_;
+                if (pants.template && child.parentTemplate_ && child instanceof HTMLTemplateElement) {
+                    pants.template(child);
+                }
+                var lastNode_ = child.bind(context);
+                if (lastNode_) {
+                    child = lastNode_;
+                }
             }
         }
     };

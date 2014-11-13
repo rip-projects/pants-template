@@ -29,22 +29,37 @@
 
         root.data =  {
             name: 'Ganesha',
-            location: 'Jakarta',
-            isLocationWillBeRendered: true
+            location: {
+                city: 'Jakarta'
+            },
+            children: [
+                {
+                    full_name: 'Abdul Rasman'
+                },
+                {
+                    full_name: 'Krisan Alfa'
+                },
+                {
+                    full_name: 'Farid Hidayat'
+                }
+            ],
+            rendered: true
         };
     })(this);
     </script>
 
     <div>
         <template is="pants-template" bind="{{ data }}">
-            <div class="container">
-                    <template if="{{ isNameWillBeRendered }}">
-                        Name <input type="text" value="{{ name }}">
-                    </template>
-                <template if="{{ isLocationWillBeRendered }}">
-                    Location <input type="text" value="{{ location }}">
+            <input type="text" value="{{ name }}">
+            <ul>
+                <template if="{{rendered}}" each="{{ children }}">
+                    <li>{{ full_name }}</li>
                 </template>
-            </div>
+            </ul>
+
+            <template if="{{rendered}}" bind="{{location}}">
+                <div>{{city}}</div>
+            </template>
         </template>
     </div>
 

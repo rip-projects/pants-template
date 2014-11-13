@@ -30,21 +30,22 @@
         root.data =  {
             name: 'Ganesha',
             location: 'Jakarta',
-            isLocationWillBeRendered: true
+            office: {
+                name: 'Xinix Technology',
+                address: 'Buncit Mas'
+            }
         };
     })(this);
     </script>
 
     <div>
         <template is="pants-template" bind="{{ data }}">
-            <div class="container">
-                    <template if="{{ isNameWillBeRendered }}">
-                        Name <input type="text" value="{{ name }}">
-                    </template>
-                <template if="{{ isLocationWillBeRendered }}">
-                    Location <input type="text" value="{{ location }}">
-                </template>
-            </div>
+            <input type="text" value="{{ name }}">
+            <template bind="{{ office }}">
+                <div>
+                    Office {{ name }}
+                </div>
+            </template>
         </template>
     </div>
 

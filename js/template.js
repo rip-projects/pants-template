@@ -73,28 +73,21 @@
 
         var firstNode, lastNode;
 
-        Array.prototype.forEach.call(fragment.querySelectorAll('template'), function(t) {
-            var node = t;
-            var count = 0;
-            while((node = node.parentNode) && count++ <= 10) {
-                if (node === fragment) {
-                    template(t);
-                    break;
-                } else if (node instanceof HTMLTemplateElement) {
-                    break;
-                }
-            }
-        });
-
         firstNode = fragment.firstChild;
         if (firstNode) {
             for (var child = fragment.firstChild; child; child = child.nextSibling) {
                 if (!child.nextSibling) {
                     lastNode = child;
                 }
-                var last = child.bind(context);
-                if (last) {
-                    child = last.lastNode;
+
+                child.parentTemplate_ = this.template;
+                if (pants.template && child.parentTemplate_ && child instanceof HTMLTemplateElement) {
+                    pants.template(child);
+                }
+
+                var lastNode_ = child.bind(context);
+                if (lastNode_) {
+                    child = lastNode_;
                 }
             }
 
@@ -113,14 +106,19 @@
 
     templateProto.wearPants_ = true;
 
+    templateProto.isVisible_ = true;
+
     templateProto.createInstance = function(context) {
         var fragment = this.content.cloneNode(true),
-            instance = new Instance(this, fragment, context);
+            instance = new Instance(this, fragment, context),
+            lastNode;
 
-        var lastNode = this.instances.length ? this.instances[this.instances.length - 1].lastNode.nextSibling : this;
-        // if (!lastNode) {
-        //     lastNode = this;
-        // }
+        if (this.instances.length) {
+            var lastInstance = this.instances[this.instances.length - 1];
+            lastNode = lastInstance.lastNode;
+        } else {
+            lastNode = this;
+        }
 
         if (this.shadow_) {
             this.getShadowRoot().appendChild(fragment);
@@ -133,16 +131,79 @@
         return instance;
     };
 
-    templateProto.bind = function(context) {
-        if (this.if_) {
-            this.observe_(context, this.if_, function(ok) {
-                this.clearInstances();
-                if (ok) {
-                    this.createInstance(context);
+    // templateProto.getParent = function(node) {
+    //     node = node || this;
+    //     var p = node.parentNode;
+    //     while (p) {
+    //       node = p;
+    //       p = node.parentNode;
+    //     }
+
+    //     return node;
+    // };
+
+    templateProto.isSubTemplate = function() {
+        if (this.parentTemplate_) {
+            return true;
+        }
+        return false;
+    };
+
+    templateProto.render = function(context) {
+        var newContext;
+
+        this.clearInstances();
+
+        // console.trace('render>>', this, context);
+
+        if (this.isVisible_) {
+            if (this.bind_) {
+                if (this.isSubTemplate()) {
+                    newContext = pants.expression(this.bind_).resolve(context);
+                    context = newContext;
                 }
+            } else if (this.each_) {
+                if (this.isSubTemplate()) {
+                    newContext = pants.expression(this.each_).resolve(context);
+                    context = newContext;
+                    var instance;
+                    for(var i in context) {
+                        instance = this.createInstance(context[i]);
+                    }
+                    return instance.lastNode;
+                } else {
+                    throw "Cannot use template[each] for sub template!";
+                }
+            }
+
+            return this.createInstance(context).lastNode;
+        }
+    };
+
+    templateProto.bind = function(context) {
+        // console.log('t>>', this);
+
+        if (this.if_) {
+            this.isVisible_ = pants.expression(this.if_).resolve(context);
+
+            this.observe_(context, this.if_, function(isVisible) {
+                this.isVisible_ = isVisible;
+                this.render(context);
             }.bind(this), 'resolve');
         }
-        return this.createInstance(context);
+
+        var lastNode = this.render(context).lastNode;
+
+        if (this.isSubTemplate()) {
+            var evalPath = this.bind_ || this.each_;
+            if (evalPath) {
+                this.observe_(context, evalPath, function() {
+                    this.render(context);
+                }.bind(this));
+            }
+        }
+
+        return lastNode;
     };
 
     templateProto.clearInstances = function() {
@@ -180,6 +241,8 @@
         this.instances = [];
 
         this.if_ = this.getAttribute('if');
+        this.each_ = this.getAttribute('each');
+        this.bind_ = this.getAttribute('bind');
         switch (this.getAttribute('shadow')) {
             case '':
             case '1':
@@ -192,12 +255,19 @@
         }
 
         var bindAttr = this.getAttribute('bind');
-        if (bindAttr) {
+        if (!this.parentTemplate_ && bindAttr) {
             var bindContext = pants.expression(bindAttr).resolve(root);
             if (bindContext) {
                 this.bind(bindContext);
             }
         }
+
+        // FIXME use deferred render for optimization
+        // var renderTimeout_, RENDER_T = 50;
+        // this.render = function(context) {
+        //     clearTimeout(renderTimeout_);
+        //     renderTimeout_ = setTimeout(this.render_.bind(this), RENDER_T);
+        // }.bind(this);
     };
 
     templateProto.attributeChangedCallback = function(attrName, oldValue, newValue) {
