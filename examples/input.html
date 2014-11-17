@@ -29,56 +29,27 @@
 
         root.data =  {
             name: 'Ganesha',
-            location: {
-                city: 'Jakarta'
-            },
-            children: [
-                {
-                    full_name: 'Abdul Rasman'
-                },
-                {
-                    full_name: 'Krisan Alfa'
-                },
-                {
-                    full_name: 'Farid Hidayat'
-                }
-            ],
-            rendered: true
-        };
-
-        root.data2 =  {
-            name: 'Ganesha',
-            children: [
-                'Abdul Rasman',
-                'Krisan Alfa',
-                'Farid Hidayat'
-            ],
-            rendered: true
+            address: 'Menjangan st 1'
         };
     })(this);
     </script>
 
     <div>
         <template is="pants-template" bind="{{ data }}">
-            <input type="text" value="{{ name }}">
-            <ul>
-                <template if="{{rendered}}" each="{{ children }}">
-                    <li>{{ full_name }}</li>
-                </template>
-            </ul>
-
-            <template if="{{rendered}}" bind="{{location}}">
-                <div>{{city}}</div>
-            </template>
-        </template>
-
-        <template is="pants-template" bind="{{ data2 }}">
-            <input type="text" value="{{ name }}">
-            <ul>
-                <template if="{{rendered}}" each="{{ children }}">
-                    <li>{{ }}</li>
-                </template>
-            </ul>
+            <div>
+                <input id="i1" type="text" value="{{ name }}">
+                <input id="i2" type="text" value="{{ name }}">
+            </div>
+            <div>
+                <span>{{ name }}</span>
+            </div>
+            <div>
+                <textarea name="" id="" cols="30" rows="10">{{address}}</textarea>
+                <textarea name="" id="" cols="30" rows="10">{{address}}</textarea>
+            </div>
+            <div>
+                <span>{{address}}</span>
+            </div>
         </template>
     </div>
 

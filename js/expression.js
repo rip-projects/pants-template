@@ -81,13 +81,27 @@
     };
 
     Expression.prototype.resolve = function(context) {
+        if (this.text.match(/{{\s*}}/)) {
+            return context;
+        }
+
         return arrayFind(this.extract(this.text), function(key) {
             return Path.get(key).getValueFrom(context);
         });
     };
 
     Expression.prototype.render = function(context) {
-        return Mustache.render(this.text, context);
+        if (this.text.match(/{{\s*}}/)) {
+            return context + '';
+        }
+
+        var resolved = this.resolve(context);
+        if (typeof resolved === 'function') {
+            return resolved.call(context);
+        } else {
+            return (resolved || '') + '';
+        }
+        // return Mustache.render(this.text, context);
     };
 
     Expression.prototype.parse = function() {

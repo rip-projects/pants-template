@@ -54,6 +54,7 @@
             }
         }
         t.bind = templateProto.bind;
+        t.unbind = templateProto.unbind;
 
         // slow on firefox to mutate node if below applied
         // Object.setPrototypeOf(t, templateProto);
@@ -192,7 +193,8 @@
             }.bind(this), 'resolve');
         }
 
-        var lastNode = this.render(context).lastNode;
+        var instance = this.render(context),
+            lastNode = instance ? instance.lastNode : this;
 
         if (this.isSubTemplate()) {
             var evalPath = this.bind_ || this.each_;
@@ -204,6 +206,10 @@
         }
 
         return lastNode;
+    };
+
+    templateProto.unbind = function() {
+        this.clearInstances();
     };
 
     templateProto.clearInstances = function() {
@@ -223,7 +229,9 @@
             } while(child && child !== instance.lastNode);
 
             children.forEach(function(child) {
+                child.unbind();
                 child.parentNode.removeChild(child);
+                child.remove();
             });
         });
 
