@@ -1,6 +1,6 @@
 {
   "name": "pants-template",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "authors": [
     "Ganesha <reekoheek@gmail.com>"
   ],
@@ -14,6 +14,6 @@
   ],
   "dependencies": {
     "platform": "Polymer/platform#^0.4.0",
-    "pants-observe": "https://github.com/xinix-technology/pants-observe.git"
+    "pants-observe": "xinix-technology/pants-observe#~0.1.0"
   }
 }
