@@ -13,6 +13,7 @@
     "tests"
   ],
   "dependencies": {
-    "platform": "Polymer/platform#^0.4.0"
+    "platform": "Polymer/platform#^0.4.0",
+    "pants-observe": "https://github.com/xinix-technology/pants-observe.git"
   }
 }
