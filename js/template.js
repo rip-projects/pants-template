@@ -43,7 +43,7 @@
 
     var root = window || global;
 
-    var template = function(t) {
+    var template = function(t, for_) {
         if (t.wearPants_) {
             return t;
         }
@@ -55,6 +55,10 @@
         }
         t.bind = templateProto.bind;
         t.unbind = templateProto.unbind;
+
+        if (for_) {
+            t.for_ = typeof for_ === 'string' ? document.getElementById(for_) : for_;
+        }
 
         // slow on firefox to mutate node if below applied
         // Object.setPrototypeOf(t, templateProto);
@@ -110,7 +114,7 @@
     templateProto.isVisible_ = true;
 
     templateProto.createInstance = function(context) {
-        var fragment = this.content.cloneNode(true),
+        var fragment = this.ref_ ? this.ref_.content.cloneNode(true) : this.content.cloneNode(true),
             instance = new Instance(this, fragment, context),
             lastNode;
 
@@ -118,13 +122,15 @@
             var lastInstance = this.instances[this.instances.length - 1];
             lastNode = lastInstance.lastNode;
         } else {
-            lastNode = this;
+            lastNode = this.for_.lastChild;
         }
 
         if (this.shadow_) {
             this.getShadowRoot().appendChild(fragment);
+        } else if (lastNode && lastNode.nextSibling) {
+            this.for_.insertBefore(fragment, lastNode.nextSibling);
         } else {
-            this.parentNode.insertBefore(fragment, lastNode.nextSibling);
+            this.for_.appendChild(fragment);
         }
 
         this.instances.push(instance);
@@ -155,7 +161,6 @@
 
         this.clearInstances();
 
-        // console.trace('render>>', this, context);
 
         if (this.isVisible_) {
             if (this.bind_) {
@@ -182,7 +187,6 @@
     };
 
     templateProto.bind = function(context) {
-        // console.log('t>>', this);
 
         if (this.if_) {
             this.isVisible_ = pants.expression(this.if_).resolve(context);
@@ -251,16 +255,27 @@
         this.if_ = this.getAttribute('if');
         this.each_ = this.getAttribute('each');
         this.bind_ = this.getAttribute('bind');
+        this.ref_ = this.getAttribute('ref');
+        if (this.ref_) {
+            this.ref_ = document.getElementById(this.ref_);
+        }
+
+        if (!this.for_) {
+            var for_ = this.getAttribute('for');
+            this.for_ = for_ ? document.getElementById(for_) : this.parentNode;
+        }
+
         switch (this.getAttribute('shadow')) {
             case '':
             case '1':
             case 'yes':
             case 'true':
-                this.shadow_ = this.parentNode;
+                this.shadow_ = this.for_;
                 break;
             default:
                 this.shadow_ = null;
         }
+        // console.log(this, this.shadow_);
 
         var bindAttr = this.getAttribute('bind');
         if (!this.parentTemplate_ && bindAttr) {
