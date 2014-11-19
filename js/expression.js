@@ -95,13 +95,14 @@
             return context + '';
         }
 
-        var resolved = this.resolve(context);
-        if (typeof resolved === 'function') {
-            return resolved.call(context);
-        } else {
-            return (resolved || '') + '';
-        }
-        // return Mustache.render(this.text, context);
+        // FIXME i think we should create our own parser since mustache is very limited
+        // var resolved = this.resolve(context);
+        // if (typeof resolved === 'function') {
+        //     return resolved.call(context);
+        // } else {
+        //     return (resolved || '') + '';
+        // }
+        return Mustache.render(this.text, context);
     };
 
     Expression.prototype.parse = function() {
