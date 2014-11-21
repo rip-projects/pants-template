@@ -136,15 +136,15 @@
     var inputBindingBind_ = function(context) {
         var valuePath = pants.expression(this.value).extract();
         if (valuePath) {
-            valuePath = Path.get(valuePath[0]);
+            valuePath = pants.path.get(valuePath[0]);
 
             var timeout, timeoutVal = 50;
             this.changedCallback_ = function(evt) {
                 clearTimeout(timeout);
                 timeout = setTimeout(function() {
-                    valuePath.setValueFrom(context, this.value);
+                    valuePath.set(context, this.value);
 
-                    // this.value = valuePath.getValueFrom(context);
+                    // this.value = valuePath.get(context);
                 }.bind(this), timeoutVal);
             };
 

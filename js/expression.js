@@ -86,7 +86,7 @@
         }
 
         return arrayFind(this.extract(this.text), function(key) {
-            return Path.get(key).getValueFrom(context);
+            return pants.path.get(key).get(context);
         });
     };
 
@@ -95,6 +95,10 @@
             return context + '';
         }
 
+        // FIXME hardcoded just for textData
+        if (this.extract()[0] === 'textData') {
+            return this.resolve(context);
+        }
         // FIXME i think we should create our own parser since mustache is very limited
         // var resolved = this.resolve(context);
         // if (typeof resolved === 'function') {
