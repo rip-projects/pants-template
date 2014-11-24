@@ -14,6 +14,6 @@
   ],
   "dependencies": {
     "platform": "Polymer/platform#^0.4.0",
-    "pants-observe": "xinix-technology/pants-observe#~0.1.5"
+    "pants-observe": "xinix-technology/pants-observe"
   }
 }
