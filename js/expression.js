@@ -70,47 +70,115 @@
     };
 
     Expression.prototype.extract = function() {
-        var extracted = {};
-        this.parse(this.text).forEach(function(token) {
-            if (token[0] === 'name') {
-                extracted[token[1]] = token[1];
-            }
-        });
-
-        return Object.keys(extracted);
+        return this.parse().identifiers;
     };
 
     Expression.prototype.resolve = function(context) {
-        if (this.text.match(/{{\s*}}/)) {
-            return context;
-        }
-
-        return arrayFind(this.extract(this.text), function(key) {
-            return pants.path.get(key).get(context);
-        });
+        return this.render(context);
     };
 
     Expression.prototype.render = function(context) {
-        if (this.text.match(/{{\s*}}/)) {
-            return context + '';
-        }
+        var parsed = this.parse(),
+            re = /{{\s*([^}]*)\s*}}/g;
 
-        // FIXME hardcoded just for textData
-        if (this.extract()[0] === 'textData') {
-            return this.resolve(context);
-        }
-        // FIXME i think we should create our own parser since mustache is very limited
-        // var resolved = this.resolve(context);
-        // if (typeof resolved === 'function') {
-        //     return resolved.call(context);
-        // } else {
-        //     return (resolved || '') + '';
-        // }
-        return Mustache.render(this.text, context);
+        return this.text.replace(re, function(toReplace, toEvaluate) {
+            return resolve_(toEvaluate, context);
+        });
     };
 
     Expression.prototype.parse = function() {
-        return Mustache.parse(this.text);
+
+        var re = /{{\s*([^}]*)\s*}}/g,
+            matches,
+            idMap = {},
+            result = {
+            'expressions': [],
+        };
+
+        while ((matches = re.exec(this.text))) {
+            result.expressions.push(matches[0]);
+
+            if (matches[1].trim() === '') {
+                idMap[''] = '';
+            } else {
+                var stokens = esprima.tokenize(matches[1]);
+                var ids = {};
+
+                populateIdentifiers_(stokens, ids);
+
+                for(var i in ids) {
+                    idMap[i] = i;
+                }
+            }
+        }
+
+        result.identifiers = Object.keys(idMap);
+
+        return result;
+    };
+
+    var populateIdentifiers_ = function(stokens, ids) {
+        var id = '',
+            accept = 'i';
+
+        stokens.forEach(function(t) {
+            switch(accept) {
+                case 'i':
+                    if (t.type === 'Identifier') {
+                        id += t.value;
+                        accept = '.[';
+                    }
+                    break;
+                case '.[':
+                    if (t.type === 'Punctuator' && t.value === '.') {
+                        id += t.value;
+                        accept = 'i';
+                    } else if (t.type === 'Punctuator' && t.value === '[') {
+                        id += t.value;
+                        accept = 'sn';
+                    } else {
+                        ids[id] = id.trim();
+                        id = '';
+                        accept = 'i';
+                    }
+                    break;
+                case 'sn':
+                    if (t.type === 'String' || t.type === 'Numeric') {
+                        id += t.value;
+                        accept = ']';
+                    } else {
+                        throw Error('Error parsing expression!');
+                    }
+                    break;
+                case ']':
+                    if (t.type === 'Punctuator' && t.value === ']') {
+                        id += t.value;
+                        accept = '.[';
+                    }
+                    break;
+            }
+        });
+
+        if (id) {
+            ids[id] = id.trim();
+        }
+    };
+
+    var resolve_ = function(text, context) {
+        if (text === '') {
+            return context;
+        }
+
+        var str = '\n';
+        for(var i in context) {
+            if (context.hasOwnProperty(i)) {
+                str += 'var ' + i + ' = this["' + i + '"]; // type ' + (typeof context[i]) + '\n';
+            }
+        }
+        str += 'return ' + text + ';\n';
+
+        var f = new Function(str);
+        return f.call(context);
     };
 
     return expression;

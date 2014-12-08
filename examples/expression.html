@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Path</title>
+</head>
+<body>
+
+    <script type="text/javascript" src="../vendor/esprima/esprima.js"></script>
+    <script type="text/javascript" src="../vendor/pants-path/js/path.js"></script>
+    <script type="text/javascript" src="../js/expression.js"></script>
+
+    <script type="text/javascript">
+    (function(root) {
+        "use strict";
+        window.a = {
+            user: {
+                username: 'Ganesha',
+                name: {
+                    first_name: 'Ganesha',
+                    last_name: 'The Great'
+                },
+                address: {
+                    street: 'Highway St.',
+                    city: 'Jakarta'
+                },
+                married: true
+            }
+        };
+        window.x = pants.expression('O {{ }} Name {{ (user.username) || ((user)) }}, City {{ user.address.city }}, Full name {{ user.name.first_name + " " + user.name.last_name }} Married? {{ user.married }} or {{ !user.married }} If {{ user.married ? (user.username === "Adoel" ? "Player" : "Handsome") : "No!" }}');
+
+        var parsed = x.parse();
+        console.log(parsed);
+
+        var rendered = x.render(a);
+        console.log(rendered);
+
+        var extracted = x.extract();
+        console.log(extracted);
+
+    })(this);
+    </script>
+</body>
+</html>
