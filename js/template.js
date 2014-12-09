@@ -187,7 +187,6 @@
     };
 
     templateProto.bind = function(context) {
-
         if (this.if_) {
             this.isVisible_ = pants.expression(this.if_).resolve(context);
 

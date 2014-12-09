@@ -74,7 +74,10 @@
     };
 
     Expression.prototype.resolve = function(context) {
-        return this.render(context);
+        var parsed = this.parse(),
+            re = /{{\s*([^}]*)\s*}}/g,
+            matches = re.exec(this.text);
+        return resolve_(matches[1], context, parsed);
     };
 
     Expression.prototype.render = function(context) {
@@ -82,7 +85,7 @@
             re = /{{\s*([^}]*)\s*}}/g;
 
         return this.text.replace(re, function(toReplace, toEvaluate) {
-            return resolve_(toEvaluate, context);
+            return resolve_(toEvaluate, context, parsed);
         });
     };
 
@@ -164,21 +167,25 @@
         }
     };
 
-    var resolve_ = function(text, context) {
+    var resolve_ = function(text, context, parsed) {
         if (text === '') {
             return context;
         }
 
-        var str = '\n';
-        for(var i in context) {
-            if (context.hasOwnProperty(i)) {
-                str += 'var ' + i + ' = this["' + i + '"]; // type ' + (typeof context[i]) + '\n';
-            }
-        }
-        str += 'return ' + text + ';\n';
+        console.log('x', text, esprima.parse(text));
 
-        var f = new Function(str);
-        return f.call(context);
+        return pants.path(context).get(text);
+
+        // var str = '\n';
+        // for(var i in context) {
+        //     if (context.hasOwnProperty(i)) {
+        //         str += 'var ' + i + ' = this["' + i + '"]; // type ' + (typeof context[i]) + '\n';
+        //     }
+        // }
+        // str += 'return ' + text + ';\n';
+
+        // var f = new Function(str);
+        // return f.call(context);
     };
 
     return expression;
