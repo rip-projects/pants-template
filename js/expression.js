@@ -168,24 +168,30 @@
     };
 
     var resolve_ = function(text, context, parsed) {
-        if (text === '') {
+        text = (text || '').trim();
+        if (text === '' || text === '_') {
             return context;
         }
 
-        console.log('x', text, esprima.parse(text));
+        if (typeof context === 'undefined') {
+            return undefined;
+        }
 
-        return pants.path(context).get(text);
+        var str = '\n';
+        var tokenMap = {};
+        parsed.identifiers.forEach(function(identifier) {
+            var token = pants.path.get(identifier)[0];
+            if (!tokenMap[token]) {
+                tokenMap[token] = token;
+                str += 'var ' + token + ' = this["' + token + '"]; // type ' + (typeof context[token]) + '\n';
+            }
+        });
+        str += '\nreturn ' + text + ';\n\n';
 
-        // var str = '\n';
-        // for(var i in context) {
-        //     if (context.hasOwnProperty(i)) {
-        //         str += 'var ' + i + ' = this["' + i + '"]; // type ' + (typeof context[i]) + '\n';
-        //     }
-        // }
-        // str += 'return ' + text + ';\n';
+        var f = new Function(str);
+        var result = f.call(context);
 
-        // var f = new Function(str);
-        // return f.call(context);
+        return result;
     };
 
     return expression;

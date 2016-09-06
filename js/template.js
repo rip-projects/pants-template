@@ -161,7 +161,6 @@
 
         this.clearInstances();
 
-
         if (this.isVisible_) {
             if (this.bind_) {
                 if (this.isSubTemplate()) {
@@ -176,9 +175,13 @@
                     for(var i in context) {
                         instance = this.createInstance(context[i]);
                     }
-                    return instance.lastNode;
+                    if (instance) {
+                        return instance.lastNode;
+                    } else {
+                        return;
+                    }
                 } else {
-                    throw "Cannot use template[each] for sub template!";
+                    throw "Cannot use template[each] for non sub template!";
                 }
             }
 

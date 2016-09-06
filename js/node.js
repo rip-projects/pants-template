@@ -83,6 +83,10 @@
     };
 
     HTMLElement.prototype.bind = function(context) {
+        if (this.nodeName.indexOf('-') >= 0) {
+            return;
+        }
+
         var that = this;
         Array.prototype.forEach.call(this.attributes, function(attribute) {
             if (attribute.name.indexOf('on-') === 0) {
@@ -198,7 +202,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         window.observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
-                console.log('mutation', mutation);
+                // console.log('mutation', mutation);
                 Array.prototype.forEach.call(mutation.removedNodes, function(htmlNode) {
                     htmlNode.unbind();
                 });
