@@ -1,5 +1,6 @@
-pants-template
-==============
+# pants-template
+
+> DEPRECATED: Please use [xin](https://github.com/xinix-technology/xin)
 
 [![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat-square)](https://github.com/xinix-technology/pants-template/blob/master/LICENSE)
 [![Bower](http://img.shields.io/bower/v/xinix-technology/pants-template.svg?style=flat-square)](https://github.com/xinix-technology/pants-template)
